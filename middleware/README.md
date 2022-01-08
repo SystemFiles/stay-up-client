@@ -1,0 +1,3 @@
+# Middleware
+
+Additional middleware (pre-render) functions go here...
