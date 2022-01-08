@@ -37,7 +37,7 @@
     <div class="container operations fixed-bottom">
       <div class="row bg-body pb-1 justify-content-end">
         <div class="col-md-2 col-sm-12">
-          <nuxt-link to="/add">
+          <nuxt-link to="/add" replace>
             <button type="button" class="w-100 my-1 btn btn-success">
               ADD
             </button>
@@ -105,7 +105,6 @@ export default {
     components: { ServiceListItem },
     data() {
         return {
-            connection: null,
             services: [],
             error: false,
             errorMessage: "",
@@ -114,29 +113,43 @@ export default {
             componentKey: 0,
         };
     },
+    computed: {
+      connection() {
+        return this.$store.state.connection
+      }
+    },
+    beforeMount () {
+      if (this.connection) {
+        console.log("Closing any left-over connections ... ")
+        this.connection.close(1000)
+      }
+    },
     mounted () {
       console.log("Creating connection to stay-up websocket server...");
-      this.connection = new WebSocket(this.$config.API_WEBSOCK_URL);
+      const conn = new WebSocket(this.$config.API_WEBSOCK_URL);
       const vm = this;
-      this.connection.onmessage = function (event) {
+      conn.onmessage = function (event) {
           const data = event.data ? JSON.parse(event.data) : [];
           vm.$data.services = data;
       }
-      this.connection.onopen = function (event) {
-          console.log("Successfully opened connection to stay-up websocket server!");
-          console.log(event);
+      conn.onopen = function (event) {
+        console.log("Successfully opened connection to stay-up websocket server!");
+        console.log(event);
       }
-      this.connection.onerror = function (err) {
+      conn.onerror = function (err) {
           console.log(`Error occurred in websocket connection: ${err}`);
           vm.$data.error = true;
           vm.$data.errorMessage =
               "Failed to load data from websocket. Websocket connection closed. Refresh the page to try again";
       }
-      this.connection.onclose = function (event) {
+      conn.onclose = function (event) {
           console.log("Closed connection to stay-up websocket server");
           console.log(event);
           vm.$data.services = [];
       }
+
+      // set connection in global state
+      this.setConnection(conn)
     },
     methods: {
       toggleError() {
@@ -166,6 +179,9 @@ export default {
               console.log(err.response ? err.response.data.message : err.message);
           });
       },
+      setConnection(conn) {
+        this.$store.commit('set', conn)
+      }
     }
 }
 </script>
