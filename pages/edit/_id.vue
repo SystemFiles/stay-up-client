@@ -104,7 +104,9 @@
               </fieldset>
             </div>
             <br />
-            <button type="submit" class="btn btn-primary mb-2">Save Changes</button>
+            <button type="submit" class="btn btn-primary mb-2">
+              Save Changes
+            </button>
             <nuxt-link to="/" replace>
               <button type="button" class="btn btn-secondary mb-2">
                 Cancel
@@ -149,32 +151,35 @@ export default {
   components: {
     BarLoader,
   },
-  asyncData (ctx) {
+  asyncData(ctx) {
     const id = ctx.route.params.id
     const cfg = ctx.$config
 
-    const data = ctx.$axios.$get(`${cfg.API_BASE_URL}/service/${id}`).then((res) => {
-      return {
-        serviceID: id,
-        serviceName: res.Name,
-        serviceHost: res.Host,
-        servicePort: res.Port,
-        serviceDescription: res.Description,
-        serviceProtocol: res.Protocol.toUpperCase(),
-        serviceTimeoutMs: res.TimeoutMs,
-        isLoading: false,
-        error: false,
-        errorMessage: ''
-      }
-    }).catch((err) => {
-      // throw error
-      console.log(err)
-      return {
-        isLoading: false,
-        error: true,
-        errorMessage: "Something went wrong pre-fetching service data."
-      }
-    })
+    const data = ctx.$axios
+      .$get(`${cfg.API_BASE_URL}/service/${id}`)
+      .then((res) => {
+        return {
+          serviceID: id,
+          serviceName: res.Name,
+          serviceHost: res.Host,
+          servicePort: res.Port,
+          serviceDescription: res.Description,
+          serviceProtocol: res.Protocol.toUpperCase(),
+          serviceTimeoutMs: res.TimeoutMs,
+          isLoading: false,
+          error: false,
+          errorMessage: '',
+        }
+      })
+      .catch((err) => {
+        // throw error
+        console.log(err)
+        return {
+          isLoading: false,
+          error: true,
+          errorMessage: 'Something went wrong pre-fetching service data.',
+        }
+      })
 
     return data
   },
@@ -198,28 +203,32 @@ export default {
     onSave() {
       if (process.client) {
         const updates = []
-        const data = JSON.parse(JSON.stringify(this.$data));
+        const data = JSON.parse(JSON.stringify(this.$data))
         for (const [key, value] of Object.entries(data)) {
           if (key.startsWith('service') && !key.toUpperCase().endsWith('ID')) {
             const reqData = {
               id: parseInt(this.$data.serviceID),
               attribute: key.trim().substring(7),
-              new_value: value
+              new_value: value,
             }
-            updates.push(this.$axios.$put(`${this.$config.API_BASE_URL}/service`, reqData))
+            updates.push(
+              this.$axios.$put(`${this.$config.API_BASE_URL}/service`, reqData)
+            )
           }
         }
 
         this.$data.isLoading = true
-        Promise.all(updates).then(() => {
-          this.$data.isLoading = false
-          this.$router.replace({ name: 'index' })
-        }).catch((err) => {
-          console.log(err.response ? err.response.data.message : err.message)
-          this.$data.isLoading = false
-          this.$data.error = true
-          this.$data.errorMessage = `Could not update service. See log for details`
-        })
+        Promise.all(updates)
+          .then(() => {
+            this.$data.isLoading = false
+            this.$router.replace({ name: 'index' })
+          })
+          .catch((err) => {
+            console.log(err.response ? err.response.data.message : err.message)
+            this.$data.isLoading = false
+            this.$data.error = true
+            this.$data.errorMessage = `Could not update service. See log for details`
+          })
       }
     },
   },

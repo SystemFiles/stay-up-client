@@ -168,32 +168,33 @@ export default {
     },
     onPublish() {
       if (process.client) {
-      const reqData = {
-        name: this.$data.serviceName.trim().substring(0, 17),
-        description:
-          this.$data.serviceDesc.length > 0
-            ? this.$data.serviceDesc.trim().substring(0, 28)
-            : 'No description was provided',
-        host: this.$data.serviceHost.trim(),
-        port: parseInt(this.$data.servicePort),
-        protocol: this.$data.serviceProtocol.trim(),
-        timeout: parseInt(this.$data.serviceTimeout),
-      }
+        const reqData = {
+          name: this.$data.serviceName.trim().substring(0, 17),
+          description:
+            this.$data.serviceDesc.length > 0
+              ? this.$data.serviceDesc.trim().substring(0, 28)
+              : 'No description was provided',
+          host: this.$data.serviceHost.trim(),
+          port: parseInt(this.$data.servicePort),
+          protocol: this.$data.serviceProtocol.trim(),
+          timeout: parseInt(this.$data.serviceTimeout),
+        }
 
-      // start loading
-      this.$data.isLoading = true
+        // start loading
+        this.$data.isLoading = true
 
-      this.$axios.$post(`${this.$config.API_BASE_URL}/service`, reqData)
-        .then(() => {
-          this.$data.isLoading = false
-          this.$router.replace({ name: 'index' })
-        })
-        .catch((err) => {
-          console.log(err.response ? err.response.data.message : err.message)
-          this.$data.isLoading = false
-          this.$data.error = true
-          this.$data.errorMessage = `Could not create new service. See log for details.`
-        })
+        this.$axios
+          .$post(`${this.$config.API_BASE_URL}/service`, reqData)
+          .then(() => {
+            this.$data.isLoading = false
+            this.$router.replace({ name: 'index' })
+          })
+          .catch((err) => {
+            console.log(err.response ? err.response.data.message : err.message)
+            this.$data.isLoading = false
+            this.$data.error = true
+            this.$data.errorMessage = `Could not create new service. See log for details.`
+          })
       }
     },
   },

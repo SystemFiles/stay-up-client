@@ -3,7 +3,7 @@ name: Lint and Scan Docker
 on:
   push:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   lint-scan:
@@ -19,8 +19,8 @@ jobs:
         run: docker build -t local/stayup-client:latest .
       - uses: anchore/scan-action@v2
         with:
-          image: "local/stayup-client:latest"
-          severity-cutoff: "high"
+          image: 'local/stayup-client:latest'
+          severity-cutoff: 'high'
           fail-build: false
           acs-report-enable: true
       - name: Inspect action SARIF report
