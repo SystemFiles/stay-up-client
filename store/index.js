@@ -1,9 +1,9 @@
 export const state = () => ({
-	connection : null
+  connection: null,
 })
 
 export const mutations = {
-	set(state, value) {
-		state.connection = value
-	}
+  set(state, value) {
+    state.connection = value
+  },
 }

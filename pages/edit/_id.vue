@@ -15,9 +15,9 @@
         :size="150"
       ></BarLoader>
       <div class="row mt-5">
-        <form data-bitwarden-watching="1" @submit.prevent="onPublish">
+        <form data-bitwarden-watching="1" @submit.prevent="onSave">
           <fieldset>
-            <legend>Add a Service</legend>
+            <legend>Edit Service</legend>
             <div class="form-group">
               <label for="serviceName" class="form-label mt-4"
                 >Service Name</label
@@ -35,7 +35,7 @@
               >
               <input
                 id="serviceDescInput"
-                v-model="serviceDesc"
+                v-model="serviceDescription"
                 type="text"
                 class="form-control"
                 placeholder="enter a short description of the service"
@@ -91,7 +91,7 @@
                 >
                 <input
                   id="serviceTimeout"
-                  v-model="serviceTimeout"
+                  v-model="serviceTimeoutMs"
                   type="range"
                   class="form-range"
                   min="0"
@@ -99,12 +99,14 @@
                   step="50"
                 />
                 <p class="d-flex justify-content-end">
-                  {{ serviceTimeout }} ms
+                  {{ serviceTimeoutMs }} ms
                 </p>
               </fieldset>
             </div>
             <br />
-            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+            <button type="submit" class="btn btn-primary mb-2">
+              Save Changes
+            </button>
             <nuxt-link to="/" replace>
               <button type="button" class="btn btn-secondary mb-2">
                 Cancel
@@ -145,46 +147,78 @@
 <script>
 import { BarLoader } from '@saeris/vue-spinners'
 export default {
-  name: 'StayupAdd',
+  name: 'StayUpEdit',
   components: {
     BarLoader,
   },
+  asyncData(ctx) {
+    const id = ctx.route.params.id
+    const cfg = ctx.$config
+
+    const data = ctx.$axios
+      .$get(`${cfg.API_BASE_URL}/service/${id}`)
+      .then((res) => {
+        return {
+          serviceID: id,
+          serviceName: res.Name,
+          serviceHost: res.Host,
+          servicePort: res.Port,
+          serviceDescription: res.Description,
+          serviceProtocol: res.Protocol.toUpperCase(),
+          serviceTimeoutMs: res.TimeoutMs,
+          isLoading: false,
+          error: false,
+          errorMessage: '',
+        }
+      })
+      .catch((err) => {
+        // throw error
+        console.log(err)
+        return {
+          isLoading: false,
+          error: true,
+          errorMessage: 'Something went wrong pre-fetching service data.',
+        }
+      })
+
+    return data
+  },
   data() {
     return {
-      isLoading: false,
+      isLoading: true,
       error: false,
       errorMessage: '',
       serviceName: '',
       serviceHost: '',
       servicePort: '',
-      serviceDesc: '',
+      serviceDescription: '',
       serviceProtocol: 'TCP',
-      serviceTimeout: 250,
+      serviceTimeoutMs: 250,
     }
   },
   methods: {
     toggleError() {
       this.$data.error = false
     },
-    onPublish() {
+    onSave() {
       if (process.client) {
-        const reqData = {
-          name: this.$data.serviceName.trim().substring(0, 17),
-          description:
-            this.$data.serviceDesc.length > 0
-              ? this.$data.serviceDesc.trim().substring(0, 28)
-              : 'No description was provided',
-          host: this.$data.serviceHost.trim(),
-          port: parseInt(this.$data.servicePort),
-          protocol: this.$data.serviceProtocol.trim(),
-          timeout: parseInt(this.$data.serviceTimeout),
+        const updates = []
+        const data = JSON.parse(JSON.stringify(this.$data))
+        for (const [key, value] of Object.entries(data)) {
+          if (key.startsWith('service') && !key.toUpperCase().endsWith('ID')) {
+            const reqData = {
+              id: parseInt(this.$data.serviceID),
+              attribute: key.trim().substring(7),
+              new_value: value,
+            }
+            updates.push(
+              this.$axios.$put(`${this.$config.API_BASE_URL}/service`, reqData)
+            )
+          }
         }
 
-        // start loading
         this.$data.isLoading = true
-
-        this.$axios
-          .$post(`${this.$config.API_BASE_URL}/service`, reqData)
+        Promise.all(updates)
           .then(() => {
             this.$data.isLoading = false
             this.$router.replace({ name: 'index' })
@@ -193,7 +227,7 @@ export default {
             console.log(err.response ? err.response.data.message : err.message)
             this.$data.isLoading = false
             this.$data.error = true
-            this.$data.errorMessage = `Could not create new service. See log for details.`
+            this.$data.errorMessage = `Could not update service. See log for details`
           })
       }
     },
