@@ -95,5 +95,7 @@ export default {
 		API_BASE_URL    : process.env.API_BASE_URL || 'http://localhost:5555/api'
 	},
 
-	privateRuntimeConfig : {}
+	privateRuntimeConfig : {
+		API_BASE_URL : process.env.API_BASE_URL || 'http://localhost:5555/api'
+	}
 }

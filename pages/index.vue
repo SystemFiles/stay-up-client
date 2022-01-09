@@ -162,10 +162,11 @@ export default {
           this.componentKey += 1; // will force re-render
       },
       updateSvc(svc) {
-          console.log("NOT IMPLEMENTED");
-          console.log(`Will update: ${svc.Name} (${svc.ID})`);
-          this.$data.error = true;
-          this.$data.errorMessage = "Feature not implemented yet...";
+        // console.log("NOT IMPLEMENTED");
+        // console.log(`Will update: ${svc.Name} (${svc.ID})`);
+        // this.$data.error = true;
+        // this.$data.errorMessage = "Feature not implemented yet...";
+        this.$router.push(`edit/${svc.ID}`)
       },
       deleteSvc(svc) {
           this.$axios.$delete(`${this.$config.API_BASE_URL}/service/${svc.ID}`)
