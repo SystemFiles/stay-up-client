@@ -199,7 +199,6 @@ export default {
       if (process.client) {
         const updates = []
         const data = JSON.parse(JSON.stringify(this.$data));
-        console.log(data)
         for (const [key, value] of Object.entries(data)) {
           if (key.startsWith('service') && !key.toUpperCase().endsWith('ID')) {
             const reqData = {
