@@ -27,6 +27,7 @@
               :host="svc.Host"
               :port="svc.Port"
               :current-status="svc.CurrentStatus"
+              :uptime-seconds="svc.UptimeSeconds"
               @deleteSvc="deleteSvc(svc)"
               @updateSvc="updateSvc(svc)"
             />
@@ -162,10 +163,6 @@ export default {
       this.componentKey += 1 // will force re-render
     },
     updateSvc(svc) {
-      // console.log("NOT IMPLEMENTED");
-      // console.log(`Will update: ${svc.Name} (${svc.ID})`);
-      // this.$data.error = true;
-      // this.$data.errorMessage = "Feature not implemented yet...";
       this.$router.push(`edit/${svc.ID}`)
     },
     deleteSvc(svc) {
