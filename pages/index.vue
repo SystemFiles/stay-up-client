@@ -19,6 +19,9 @@
               No services to display ... try adding one!
             </p>
           </div>
+          <div class="my-5" >
+            <LatencyLineChart :chart-data="chartData" />
+          </div>
           <div v-for="svc in services" :key="svc.ID" class="col-md-3">
             <ServiceListItem
               :id="svc.ID"
@@ -101,11 +104,13 @@
 
 <script>
 import ServiceListItem from '../components/ServiceListItem.vue'
+import LatencyLineChart from '../components/LatencyLineChart.vue'
 export default {
   name: 'StayupHome',
-  components: { ServiceListItem },
+  components: { ServiceListItem, LatencyLineChart },
   data() {
     return {
+      chartData: {},
       services: [],
       error: false,
       errorMessage: '',
@@ -132,10 +137,16 @@ export default {
     conn.onmessage = function (event) {
       const data = event.data ? JSON.parse(event.data) : []
       vm.$data.services = data
+      
+      // update chart data on each message
+      vm.updateChartData(data)
     }
     conn.onopen = function (event) {
       console.log('Successfully opened connection to stay-up websocket server!')
       console.log(event)
+      
+      // init chart data
+      vm.initChartData()
     }
     conn.onerror = function (err) {
       console.log(`Error occurred in websocket connection: ${err}`)
@@ -181,6 +192,53 @@ export default {
     setConnection(conn) {
       this.$store.commit('set', conn)
     },
+    initChartData() {
+      const timestamp = new Date().toISOString()
+      const initData = {
+        labels: [timestamp, timestamp],
+        datasets: [
+          {
+            label: 'Bitwarden',
+            backgroundColor: `rgba(248,121,121,1.0)`,
+            data: [0, 12]
+          }
+        ]
+      }
+
+      // Initialize chartData
+      this.$data.chartData = initData
+    },
+    updateChartData(serviceList) {
+      const timestamp = new Date().toISOString()
+
+      // take existing chart data
+      const existing = this.$data.chartData
+
+      // create new chart data compatable data object from service data
+      // const currentData = {
+      //   label: 'Bitwarden',
+      //   backgroundColor: `rgba(248,121,121,1.0)`,
+      //   data: [...existing.datasets[0].data, 100]
+      // }
+      
+      const updatedDatasets = []
+      for (const ds of existing.datasets) {
+        updatedDatasets.push({
+          label: ds.label,
+          backgroundColor: ds.backgroundColor,
+          data: [...existing.datasets[0].data, 100]
+        })
+      }
+
+      // append the changes (timestamp and current latency)
+      const updateChartData = {
+        labels: [...existing.labels, timestamp],
+        datasets: updatedDatasets
+      }
+
+      // return updated chartData object containing the new changes
+      this.$data.chartData = updateChartData
+    }
   },
 }
 </script>
