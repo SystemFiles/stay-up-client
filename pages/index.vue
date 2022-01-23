@@ -12,7 +12,10 @@
       <h2 class="mt-5">Services</h2>
       <p class="mb-5">service monitoring with realtime latency reports</p>
 
-      <div v-if="loading" class="d-flex justify-content-center w-100 load-indicator">
+      <div
+        v-if="loading"
+        class="d-flex justify-content-center w-100 load-indicator"
+      >
         <SquareLoader
           class="d-flex justify-content-center"
           :loading="loading"
@@ -126,7 +129,7 @@ export default {
       error: false,
       errorMessage: '',
       success: false,
-      successMessage: ''
+      successMessage: '',
     }
   },
   computed: {
