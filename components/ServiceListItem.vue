@@ -100,7 +100,6 @@ export default {
 </script>
 
 <style>
-
 /* For Mobile */
 @media (min-width: 768px) {
   .service-delete-button {

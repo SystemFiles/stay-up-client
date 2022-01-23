@@ -35,7 +35,7 @@ export default {
             {
               scaleLabel: {
                 display: true,
-                labelString: 'Time (MM:SS)'
+                labelString: 'Time (MM:SS)',
               },
               gridLines: {
                 display: true,
