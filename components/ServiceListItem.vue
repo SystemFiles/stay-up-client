@@ -25,11 +25,7 @@
       </div>
       <div class="row mt-2">
         <div class="col-md-6" style="padding-right: 5px">
-          <button
-            type="button"
-            class="w-100 btn btn-danger"
-            @click="deleteSvc"
-          >
+          <button type="button" class="w-100 btn btn-danger" @click="deleteSvc">
             DELETE
           </button>
         </div>
@@ -44,7 +40,10 @@
         </div>
       </div>
       <div class="row mt-3">
-        <p style="font-size: small;" class="card-text text-muted d-flex justify-content-center">
+        <p
+          style="font-size: small"
+          class="card-text text-muted d-flex justify-content-center"
+        >
           Up-time: {{ truncateUptime(uptimeSeconds) }}
         </p>
       </div>
@@ -83,8 +82,8 @@ export default {
     },
     uptimeSeconds: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     truncateUptime(uptimeSeconds) {

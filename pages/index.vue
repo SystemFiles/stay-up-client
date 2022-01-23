@@ -11,7 +11,7 @@
     <div class="container page">
       <h2 class="mt-5">Services</h2>
       <p class="mb-5">service monitoring with realtime latency reports</p>
-      
+
       <div v-if="services.length" class="chart-container my-0">
         <LatencyLineChart :chart-data="chartData" />
       </div>
@@ -108,7 +108,7 @@ import ServiceListItem from '../components/ServiceListItem.vue'
 import LatencyLineChart from '../components/LatencyLineChart.vue'
 export default {
   name: 'StayupHome',
-  components: { ServiceListItem, LatencyLineChart,  },
+  components: { ServiceListItem, LatencyLineChart },
   data() {
     return {
       firstLoad: false,
@@ -159,7 +159,9 @@ export default {
         }
       }
       conn.onopen = function (event) {
-        console.log('Successfully opened connection to stay-up websocket server!')
+        console.log(
+          'Successfully opened connection to stay-up websocket server!'
+        )
         console.log(event)
       }
       conn.onerror = function (err) {
@@ -215,9 +217,9 @@ export default {
             backgroundColor: `${this.generateRandomRGBAColor()}`,
             pointHitRadius: 5,
             pointHoverRadius: 5,
-            data: [svc.LatencyMs]
+            data: [svc.LatencyMs],
           }
-        })
+        }),
       }
 
       // Initialize chartData
@@ -238,14 +240,22 @@ export default {
           backgroundColor: ds.backgroundColor,
           pointHitRadius: ds.pointHitRadius,
           pointHoverRadius: ds.pointHoverRadius,
-          data: [...existingChartData.datasets.filter((o) => (o.label === ds.label))[0].data.slice(-historyDistance), serviceData.filter((svc) => (svc.Name === ds.label))[0].LatencyMs]
+          data: [
+            ...existingChartData.datasets
+              .filter((o) => o.label === ds.label)[0]
+              .data.slice(-historyDistance),
+            serviceData.filter((svc) => svc.Name === ds.label)[0].LatencyMs,
+          ],
         })
       }
 
       // append the changes (timestamp and current latency)
       const updateChartData = {
-        labels: [...existingChartData.labels.slice(-historyDistance), timestamp],
-        datasets: updatedDatasets
+        labels: [
+          ...existingChartData.labels.slice(-historyDistance),
+          timestamp,
+        ],
+        datasets: updatedDatasets,
       }
 
       // return updated chartData object containing the new changes
@@ -255,11 +265,16 @@ export default {
       const o = Math.round
       const r = Math.random
       const s = 255
-      return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.7)'
+      return (
+        'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',0.7)'
+      )
     },
     formatTime(date) {
-      return `${date.getMinutes()}:${String(date.getSeconds()).padStart(2, '0')}`
-    }
+      return `${date.getMinutes()}:${String(date.getSeconds()).padStart(
+        2,
+        '0'
+      )}`
+    },
   },
 }
 </script>
@@ -271,7 +286,8 @@ export default {
 .chart-container {
   border-radius: 10px;
   background-color: #fff;
-  box-shadow: 0 15px 30px 0 rgba(0,0,0,.11), 0 5px 15px 0 rgba(0,0,0,.08);
+  box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.11),
+    0 5px 15px 0 rgba(0, 0, 0, 0.08);
   padding: 2rem 4rem;
   margin: 1rem 0;
 }
