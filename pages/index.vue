@@ -1,5 +1,5 @@
 <template>
-  <div :key="componentKey" class="home-page">
+  <div class="home-page">
     <div class="banner">
       <div class="container" style="margin-top: 2.4rem">
         <h1 class="d-flex justify-content-center logo-font">StayUp</h1>
@@ -12,13 +12,23 @@
       <h2 class="mt-5">Services</h2>
       <p class="mb-5">service monitoring with realtime latency reports</p>
 
-      <div v-if="services.length" class="chart-container my-0">
+      <div
+        v-if="loading"
+        class="d-flex justify-content-center w-100 load-indicator"
+      >
+        <SquareLoader
+          class="d-flex justify-content-center"
+          :loading="loading"
+          :size="50"
+        ></SquareLoader>
+      </div>
+      <div v-if="services.length && !loading" class="chart-container my-0">
         <LatencyLineChart :chart-data="chartData" />
       </div>
 
       <div class="container mt-5 mx-auto service-box">
         <div class="row">
-          <div v-if="!services.length">
+          <div v-if="!services.length && !loading">
             <p class="d-flex justify-content-center mt-5">
               No services to display ... try adding one!
             </p>
@@ -104,13 +114,15 @@
 </template>
 
 <script>
+import { SquareLoader } from '@saeris/vue-spinners'
 import ServiceListItem from '../components/ServiceListItem.vue'
 import LatencyLineChart from '../components/LatencyLineChart.vue'
 export default {
   name: 'StayupHome',
-  components: { ServiceListItem, LatencyLineChart },
+  components: { ServiceListItem, LatencyLineChart, SquareLoader },
   data() {
     return {
+      loading: true,
       firstLoad: false,
       chartData: {},
       services: [],
@@ -118,7 +130,6 @@ export default {
       errorMessage: '',
       success: false,
       successMessage: '',
-      componentKey: 0,
     }
   },
   computed: {
@@ -139,6 +150,10 @@ export default {
     // open websocker for service data
     this.openWebsocketConn()
   },
+  updated() {
+    // stop loading
+    this.$data.loading = false
+  },
   methods: {
     openWebsocketConn() {
       console.log('Creating connection to stay-up websocket server...')
@@ -152,11 +167,16 @@ export default {
           // init chart data
           vm.initChartData(data)
           vm.$data.firstLoad = false
-        } else {
+        } else if (data.length > 0) {
           // update chart data on each message
           vm.$data.services = data
           vm.updateChartData()
         }
+
+        // prevents loading from continuing forever
+        setTimeout(() => {
+          vm.$data.loading = false
+        }, 5000)
       }
       conn.onopen = function (event) {
         console.log(
@@ -185,8 +205,11 @@ export default {
     toggleSuccess() {
       this.$data.success = false
     },
-    refresh() {
-      this.componentKey += 1 // will force re-render
+    reloadData() {
+      this.$data.chartData = {}
+      this.$data.services = []
+      this.$data.firstLoad = true
+      this.$data.loading = true
     },
     updateSvc(svc) {
       this.$router.push(`edit/${svc.ID}`)
@@ -195,6 +218,10 @@ export default {
       this.$axios
         .$delete(`${this.$config.API_BASE_URL}/service/${svc.ID}`)
         .then(() => {
+          // reload data
+          this.reloadData()
+
+          // success message
           this.$data.success = true
           this.$data.successMessage = `Successfully deleted service, ${svc.Name} (${svc.ID})!`
         })
@@ -215,6 +242,7 @@ export default {
           return {
             label: svc.Name,
             backgroundColor: `${this.generateRandomRGBAColor()}`,
+            pointStyle: 'rect',
             pointHitRadius: 5,
             pointHoverRadius: 5,
             data: [svc.LatencyMs],
@@ -238,6 +266,7 @@ export default {
         updatedDatasets.push({
           label: ds.label,
           backgroundColor: ds.backgroundColor,
+          pointStyle: 'rect',
           pointHitRadius: ds.pointHitRadius,
           pointHoverRadius: ds.pointHoverRadius,
           data: [
@@ -280,6 +309,9 @@ export default {
 </script>
 
 <style>
+.load-indicator {
+  margin-top: 10rem;
+}
 .service-box {
   margin-bottom: 10rem;
 }
