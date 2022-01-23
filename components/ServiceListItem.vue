@@ -24,12 +24,12 @@
         </div>
       </div>
       <div class="row mt-2">
-        <div class="col-md-6" style="padding-right: 5px">
+        <div class="col-md-6 service-delete-button">
           <button type="button" class="w-100 btn btn-danger" @click="deleteSvc">
             DELETE
           </button>
         </div>
-        <div class="col-md-6" style="padding-left: 5px">
+        <div class="col-md-6 service-update-button">
           <button
             type="button"
             class="w-100 btn btn-primary"
@@ -98,3 +98,16 @@ export default {
   },
 }
 </script>
+
+<style>
+
+/* For Mobile */
+@media (min-width: 768px) {
+  .service-delete-button {
+    padding-right: 5px;
+  }
+  .service-update-button {
+    padding-left: 5px;
+  }
+}
+</style>

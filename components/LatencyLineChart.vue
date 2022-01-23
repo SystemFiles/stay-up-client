@@ -21,7 +21,7 @@ export default {
               ticks: {
                 beginAtZero: true,
                 callback: (value, index, values) => {
-                  return this.formatNumber(value)
+                  return `${this.formatNumber(value)} ms`
                 },
               },
               gridLines: {
@@ -33,6 +33,10 @@ export default {
           ],
           xAxes: [
             {
+              scaleLabel: {
+                display: true,
+                labelString: 'Time (MM:SS)'
+              },
               gridLines: {
                 display: true,
                 color: '#EEF0F4',
