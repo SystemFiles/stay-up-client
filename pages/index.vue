@@ -10,7 +10,7 @@
     </div>
     <div class="container page">
       <h2 class="mt-5">Services</h2>
-      <p>a list of services being tracked</p>
+      <p class="mb-5">service monitoring with realtime latency reports</p>
       
       <div class="chart-container my-0">
         <LatencyLineChart :chart-data="chartData" />
@@ -224,26 +224,27 @@ export default {
       this.$data.chartData = initData
     },
     updateChartData() {
+      const historyDistance = 12 // how many previous updates to keep on the chart
       const timestamp = this.formatTime(new Date())
 
       // current service + chart data
       const serviceData = this.$data.services
-      const existing = this.$data.chartData
+      const existingChartData = this.$data.chartData
 
       const updatedDatasets = []
-      for (const ds of existing.datasets) {
+      for (const ds of existingChartData.datasets) {
         updatedDatasets.push({
           label: ds.label,
           backgroundColor: ds.backgroundColor,
           pointHitRadius: ds.pointHitRadius,
           pointHoverRadius: ds.pointHoverRadius,
-          data: [...existing.datasets.filter((o) => (o.label === ds.label))[0].data, serviceData.filter((svc) => (svc.Name === ds.label))[0].LatencyMs]
+          data: [...existingChartData.datasets.filter((o) => (o.label === ds.label))[0].data.slice(-historyDistance), serviceData.filter((svc) => (svc.Name === ds.label))[0].LatencyMs]
         })
       }
 
       // append the changes (timestamp and current latency)
       const updateChartData = {
-        labels: [...existing.labels, timestamp],
+        labels: [...existingChartData.labels.slice(-historyDistance), timestamp],
         datasets: updatedDatasets
       }
 
