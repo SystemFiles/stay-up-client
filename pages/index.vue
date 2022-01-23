@@ -111,6 +111,7 @@ export default {
   components: { ServiceListItem, LatencyLineChart,  },
   data() {
     return {
+      firstLoad: false,
       chartData: {},
       services: [],
       error: false,
@@ -125,10 +126,13 @@ export default {
       return this.$store.state.connection
     },
   },
+  created() {
+    this.$data.firstLoad = true
+  },
   beforeMount() {
     if (this.connection) {
       console.log('Closing any left-over connections ... ')
-      this.connection.close(1000)
+      this.connection.close(1000) // normal closure
     }
   },
   mounted() {
@@ -142,17 +146,21 @@ export default {
       const vm = this
       conn.onmessage = function (event) {
         const data = event.data ? JSON.parse(event.data) : []
-        vm.$data.services = data
-        
-        // update chart data on each message
-        vm.updateChartData(data)
+
+        // init chart data (if first time with data)
+        if (vm.$data.firstLoad && data.length > 0) {
+          // init chart data
+          vm.initChartData(data)
+          vm.$data.firstLoad = false
+        } else {
+          // update chart data on each message
+          vm.$data.services = data
+          vm.updateChartData()
+        }
       }
       conn.onopen = function (event) {
         console.log('Successfully opened connection to stay-up websocket server!')
         console.log(event)
-        
-        // init chart data
-        vm.initChartData()
       }
       conn.onerror = function (err) {
         console.log(`Error occurred in websocket connection: ${err}`)
@@ -197,45 +205,39 @@ export default {
     setConnection(conn) {
       this.$store.commit('set', conn)
     },
-    initChartData() {
+    initChartData(serviceList) {
       const timestamp = this.formatTime(new Date())
       const initData = {
-        labels: [timestamp, timestamp],
-        datasets: [
-          {
-            label: 'Bitwarden',
+        labels: [timestamp],
+        datasets: serviceList.map((svc) => {
+          return {
+            label: svc.Name,
             backgroundColor: `${this.generateRandomRGBAColor()}`,
-            pointHitRadius: 20,
-            pointHoverRadius: 10,
-            data: [0, 12]
+            pointHitRadius: 5,
+            pointHoverRadius: 5,
+            data: [svc.LatencyMs]
           }
-        ]
+        })
       }
 
       // Initialize chartData
       this.$data.chartData = initData
     },
-    updateChartData(serviceList) {
+    updateChartData() {
       const timestamp = this.formatTime(new Date())
 
-      // take existing chart data
+      // current service + chart data
+      const serviceData = this.$data.services
       const existing = this.$data.chartData
 
-      // create new chart data compatable data object from service data
-      // const currentData = {
-      //   label: 'Bitwarden',
-      //   backgroundColor: `rgba(248,121,121,1.0)`,
-      //   data: [...existing.datasets[0].data, 100]
-      // }
-      
       const updatedDatasets = []
       for (const ds of existing.datasets) {
         updatedDatasets.push({
           label: ds.label,
           backgroundColor: ds.backgroundColor,
-          pointHitRadius: 20,
-          pointHoverRadius: 10,
-          data: [...existing.datasets[0].data, Math.round((Math.random() * 100) + 30)]
+          pointHitRadius: ds.pointHitRadius,
+          pointHoverRadius: ds.pointHoverRadius,
+          data: [...existing.datasets.filter((o) => (o.label === ds.label))[0].data, serviceData.filter((svc) => (svc.Name === ds.label))[0].LatencyMs]
         })
       }
 
@@ -255,7 +257,7 @@ export default {
       return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.7)'
     },
     formatTime(date) {
-      return `${date.getMinutes()}:${date.getSeconds()}`
+      return `${date.getMinutes()}:${String(date.getSeconds()).padStart(2, '0')}`
     }
   },
 }
