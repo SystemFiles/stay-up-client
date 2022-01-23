@@ -14,8 +14,9 @@ docker pull sykeben/stayup-client:<version_tag>
 
 Specified through environment varialbes you can and should set appripriate options for your environment.
 
-`API_WEBSOCK_URL` - The location to the websocket for your service data (note: must follow service model definition from [StayUp API](https://github.com/SystemFiles/stay-up))
-`API_BASE_URL` - Specifies the server base URL for the [StayUp Server](https://github.com/SystemFiles/stay-up) where we can create, edit and read service data
+- `API_WEBSOCK_URL` - The location to the websocket for your service data (note: must follow service model definition from [StayUp API](https://github.com/SystemFiles/stay-up))
+
+- `API_BASE_URL` - Specifies the server base URL for the [StayUp Server](https://github.com/SystemFiles/stay-up) where we can create, edit and read service data
 
 ## Usage
 
