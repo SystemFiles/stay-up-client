@@ -77,26 +77,4 @@ export default {
     },
   },
 }
-
-/*
-{
-        labels: [new Date().toLocaleDateString()],
-        datasets: [
-          {
-            label: "Jellyfin",
-            data: [2],
-            backgroundColor: "rgba(119,255,221,0.4)",
-            borderColor: "rgba(1, 116, 188, 0.50)",
-            pointBackgroundColor: "#f8f7f5"
-          },
-          {
-            label: "Bitwarden",
-            data: [],
-            backgroundColor: "rgba(102,255,34,0.4)",
-            borderColor: "rgba(1, 116, 188, 0.50)",
-            pointBackgroundColor: "#ab47bcff"
-          }
-        ]
-      },
-*/
 </script>
