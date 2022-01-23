@@ -11,16 +11,17 @@
     <div class="container page">
       <h2 class="mt-5">Services</h2>
       <p>a list of services being tracked</p>
+      
+      <div class="chart-container my-0">
+        <LatencyLineChart :chart-data="chartData" />
+      </div>
 
-      <div class="container mt-5 mx-auto">
+      <div class="container mt-5 mx-auto service-box">
         <div class="row">
           <div v-if="!services.length">
             <p class="d-flex justify-content-center mt-5">
               No services to display ... try adding one!
             </p>
-          </div>
-          <div class="my-5" >
-            <LatencyLineChart :chart-data="chartData" />
           </div>
           <div v-for="svc in services" :key="svc.ID" class="col-md-3">
             <ServiceListItem
@@ -107,7 +108,7 @@ import ServiceListItem from '../components/ServiceListItem.vue'
 import LatencyLineChart from '../components/LatencyLineChart.vue'
 export default {
   name: 'StayupHome',
-  components: { ServiceListItem, LatencyLineChart },
+  components: { ServiceListItem, LatencyLineChart,  },
   data() {
     return {
       chartData: {},
@@ -131,39 +132,43 @@ export default {
     }
   },
   mounted() {
-    console.log('Creating connection to stay-up websocket server...')
-    const conn = new WebSocket(this.$config.API_WEBSOCK_URL)
-    const vm = this
-    conn.onmessage = function (event) {
-      const data = event.data ? JSON.parse(event.data) : []
-      vm.$data.services = data
-      
-      // update chart data on each message
-      vm.updateChartData(data)
-    }
-    conn.onopen = function (event) {
-      console.log('Successfully opened connection to stay-up websocket server!')
-      console.log(event)
-      
-      // init chart data
-      vm.initChartData()
-    }
-    conn.onerror = function (err) {
-      console.log(`Error occurred in websocket connection: ${err}`)
-      vm.$data.error = true
-      vm.$data.errorMessage =
-        'Failed to load data from websocket. Websocket connection closed. Refresh the page to try again'
-    }
-    conn.onclose = function (event) {
-      console.log('Closed connection to stay-up websocket server')
-      console.log(event)
-      vm.$data.services = []
-    }
-
-    // set connection in global state
-    this.setConnection(conn)
+    // open websocker for service data
+    this.openWebsocketConn()
   },
   methods: {
+    openWebsocketConn() {
+      console.log('Creating connection to stay-up websocket server...')
+      const conn = new WebSocket(this.$config.API_WEBSOCK_URL)
+      const vm = this
+      conn.onmessage = function (event) {
+        const data = event.data ? JSON.parse(event.data) : []
+        vm.$data.services = data
+        
+        // update chart data on each message
+        vm.updateChartData(data)
+      }
+      conn.onopen = function (event) {
+        console.log('Successfully opened connection to stay-up websocket server!')
+        console.log(event)
+        
+        // init chart data
+        vm.initChartData()
+      }
+      conn.onerror = function (err) {
+        console.log(`Error occurred in websocket connection: ${err}`)
+        vm.$data.error = true
+        vm.$data.errorMessage =
+          'Failed to load data from websocket. Websocket connection closed. Refresh the page to try again'
+      }
+      conn.onclose = function (event) {
+        console.log('Closed connection to stay-up websocket server')
+        console.log(event)
+        vm.$data.services = []
+      }
+
+      // set connection in global state
+      this.setConnection(conn)
+    },
     toggleError() {
       this.$data.error = false
     },
@@ -193,13 +198,15 @@ export default {
       this.$store.commit('set', conn)
     },
     initChartData() {
-      const timestamp = new Date().toISOString()
+      const timestamp = this.formatTime(new Date())
       const initData = {
         labels: [timestamp, timestamp],
         datasets: [
           {
             label: 'Bitwarden',
-            backgroundColor: `rgba(248,121,121,1.0)`,
+            backgroundColor: `${this.generateRandomRGBAColor()}`,
+            pointHitRadius: 20,
+            pointHoverRadius: 10,
             data: [0, 12]
           }
         ]
@@ -209,7 +216,7 @@ export default {
       this.$data.chartData = initData
     },
     updateChartData(serviceList) {
-      const timestamp = new Date().toISOString()
+      const timestamp = this.formatTime(new Date())
 
       // take existing chart data
       const existing = this.$data.chartData
@@ -226,7 +233,9 @@ export default {
         updatedDatasets.push({
           label: ds.label,
           backgroundColor: ds.backgroundColor,
-          data: [...existing.datasets[0].data, 100]
+          pointHitRadius: 20,
+          pointHoverRadius: 10,
+          data: [...existing.datasets[0].data, Math.round((Math.random() * 100) + 30)]
         })
       }
 
@@ -238,7 +247,29 @@ export default {
 
       // return updated chartData object containing the new changes
       this.$data.chartData = updateChartData
+    },
+    generateRandomRGBAColor() {
+      const o = Math.round
+      const r = Math.random
+      const s = 255
+      return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.7)'
+    },
+    formatTime(date) {
+      return `${date.getMinutes()}:${date.getSeconds()}`
     }
   },
 }
 </script>
+
+<style>
+.service-box {
+  margin-bottom: 10rem;
+}
+.chart-container {
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 15px 30px 0 rgba(0,0,0,.11), 0 5px 15px 0 rgba(0,0,0,.08);
+  padding: 2rem 4rem;
+  margin: 1rem 0;
+}
+</style>

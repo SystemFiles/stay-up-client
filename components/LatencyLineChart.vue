@@ -11,46 +11,56 @@ export default {
       default: null
     }
   },
-  // updated() {
-  //   this.$nextTick(function () {
-  //     this.renderChart(this.chartData,
-  //       {
-  //         responsive: true,
-  //         maintainAspectRatio: false,
-  //         title: {
-  //           display: true,
-  //           text: "Realtime Latency of Services"
-  //         }
-  //       }
-  //     )
-  //   })
-  // },
-  mounted() {
-    this.renderChart(this.chartData,
-      {
-        responsive: true,
-        maintainAspectRatio: true,
-        title: {
-          display: true,
-          text: "Realtime Latency of Services"
-        },
+  data() {
+    return {
+      options: {
+        showScale: true,
         scales: {
-            yAxes: [{
-                ticks: {
-                    min: 0,
-                    max: 60
-                }
-            }],
-            xAxes: [
-              {
-                ticks: {
-                  display: false
-                }
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              callback: (value, index, values) => {
+                return this.formatNumber(value)
               }
-            ]
+            },
+            gridLines: {
+              display: true,
+              color: '#EEF0F4',
+              borderDash: [5, 15]
+            }
+          }],
+          xAxes: [ {
+            gridLines: {
+              display: true,
+              color: '#EEF0F4',
+              borderDash: [5, 15]
+            }
+          }]
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    }
+  },
+  mounted() {
+    this.renderChart(this.chartData, this.options)
+  },
+  methods: {
+    formatNumber (num) {
+      let numString = Math.round(num).toString()
+      const numberFormatMapping = [[6, 'm'], [3, 'k']]
+      for (const [numberOfDigits, replacement] of numberFormatMapping) {
+        if (numString.length > numberOfDigits) {
+          let decimal = ''
+          if (numString[numString.length - numberOfDigits] !== '0') {
+            decimal = '.' + numString[numString.length - numberOfDigits]
+          }
+          numString = numString.substr(0, numString.length - numberOfDigits) + decimal + replacement
+          break
         }
       }
-    )
+      return numString
+    }
   }
 }
 
