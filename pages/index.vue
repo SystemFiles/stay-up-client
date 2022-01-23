@@ -12,7 +12,7 @@
       <h2 class="mt-5">Services</h2>
       <p class="mb-5">service monitoring with realtime latency reports</p>
       
-      <div class="chart-container my-0">
+      <div v-if="services.length" class="chart-container my-0">
         <LatencyLineChart :chart-data="chartData" />
       </div>
 
