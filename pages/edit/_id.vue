@@ -207,7 +207,7 @@ export default {
         for (const [key, value] of Object.entries(data)) {
           if (key.startsWith('service') && !key.toUpperCase().endsWith('ID')) {
             const reqData = {
-              id: parseInt(this.$data.serviceID),
+              id: this.$data.serviceID,
               attribute: key.trim().substring(7),
               new_value: value,
             }
