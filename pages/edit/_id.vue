@@ -158,14 +158,15 @@ export default {
     const data = ctx.$axios
       .$get(`${cfg.API_BASE_URL}/service/${id}`)
       .then((res) => {
+        console.log(res)
         return {
           serviceID: id,
           serviceName: res.Name,
           serviceHost: res.Host,
-          servicePort: res.Port,
+          servicePort: parseInt(res.Port),
           serviceDescription: res.Description,
           serviceProtocol: res.Protocol.toUpperCase(),
-          serviceTimeoutMs: res.TimeoutMs,
+          serviceTimeoutMs: parseInt(res.TimeoutMs),
           isLoading: false,
           error: false,
           errorMessage: '',
@@ -202,23 +203,20 @@ export default {
     },
     onSave() {
       if (process.client) {
-        const updates = []
-        const data = JSON.parse(JSON.stringify(this.$data))
-        for (const [key, value] of Object.entries(data)) {
-          if (key.startsWith('service') && !key.toUpperCase().endsWith('ID')) {
-            const reqData = {
-              id: parseInt(this.$data.serviceID),
-              attribute: key.trim().substring(7),
-              new_value: value,
-            }
-            updates.push(
-              this.$axios.$put(`${this.$config.API_BASE_URL}/service`, reqData)
-            )
-          }
+        const data = this.$data
+        const updatedService = {
+          id: data.serviceID,
+          name: data.serviceName,
+          description: data.serviceDescription,
+          host: data.serviceHost,
+          port: parseInt(data.servicePort),
+          protocol: data.serviceProtocol,
+          timeout: parseInt(data.serviceTimeoutMs),
         }
 
         this.$data.isLoading = true
-        Promise.all(updates)
+        this.$axios
+          .$put(`${this.$config.API_BASE_URL}/service`, updatedService)
           .then(() => {
             this.$data.isLoading = false
             this.$router.replace({ name: 'index' })

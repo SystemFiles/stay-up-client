@@ -172,17 +172,17 @@ export default {
           vm.$data.services = data
           vm.updateChartData()
         }
-
-        // prevents loading from continuing forever
-        setTimeout(() => {
-          vm.$data.loading = false
-        }, 5000)
       }
       conn.onopen = function (event) {
         console.log(
           'Successfully opened connection to stay-up websocket server!'
         )
         console.log(event)
+
+        // prevents loading from continuing forever
+        setTimeout(() => {
+          vm.$data.loading = false
+        }, 5000)
       }
       conn.onerror = function (err) {
         console.log(`Error occurred in websocket connection: ${err}`)
