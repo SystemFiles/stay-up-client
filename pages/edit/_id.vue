@@ -211,19 +211,22 @@ export default {
           host: data.serviceHost,
           port: parseInt(data.servicePort),
           protocol: data.serviceProtocol,
-          timeout: parseInt(data.serviceTimeoutMs)
+          timeout: parseInt(data.serviceTimeoutMs),
         }
 
         this.$data.isLoading = true
-        this.$axios.$put(`${this.$config.API_BASE_URL}/service`, updatedService).then(() => {
-          this.$data.isLoading = false
-          this.$router.replace({name: 'index'})
-        }).catch((err) => {
-          console.log(err.response ? err.response.data.message : err.message)
-          this.$data.isLoading = false
-          this.$data.error = true
-          this.$data.errorMessage = `Could not update service. See log for details`
-        })
+        this.$axios
+          .$put(`${this.$config.API_BASE_URL}/service`, updatedService)
+          .then(() => {
+            this.$data.isLoading = false
+            this.$router.replace({ name: 'index' })
+          })
+          .catch((err) => {
+            console.log(err.response ? err.response.data.message : err.message)
+            this.$data.isLoading = false
+            this.$data.error = true
+            this.$data.errorMessage = `Could not update service. See log for details`
+          })
       }
     },
   },
