@@ -56,7 +56,7 @@ export default {
   name: 'ServiceListItem',
   props: {
     id: {
-      type: Number,
+      type: String,
       required: true,
     },
     name: {
